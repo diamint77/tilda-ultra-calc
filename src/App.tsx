@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   TreeDeciduous, 
@@ -14,9 +14,7 @@ import {
   ChevronLeft, 
   CheckCircle2, 
   MessageSquare, 
-  Clock, 
-  Users, 
-  Info,
+  Clock,
   Maximize2,
   Lock,
   ArrowRight
@@ -54,7 +52,7 @@ const IVAN_HINTS: Record<string, string[]> = {
     complex: ["Комплекс — самый выгодный вариант, экономия до 15%!", "Всё сразу: спилим, измельчим и вывезем."]
   } as any,
   parameters: ["Чем точнее параметры, тем точнее цена. Но не переживайте, замерщик все подтвердит.", "Сложные условия (забор, провода) требуют больше времени, но мы справимся."],
-  result: ["Отличный расчет! Я забронировал для вас скидку 5% на 24 часа.", "Цена зафиксирована! Оставьте заявку, пока бригада свободна."]
+  result: ["Отличный расчет! Предварительная смета готова.", "Цена ориентировочная! Оставьте заявку для точного расчета."]
 };
 
 // --- Helper Components ---
@@ -113,16 +111,7 @@ export default function App() {
     nearWires: false,
     location: 'spb'
   });
-  const [liveViewers, setLiveViewers] = useState(7);
   const [ivanText, setIvanText] = useState(IVAN_HINTS.welcome[0]);
-
-  // Simulation of live viewers
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setLiveViewers(prev => Math.max(3, Math.min(18, prev + Math.floor(Math.random() * 3) - 1)));
-    }, 5000);
-    return () => clearInterval(interval);
-  }, []);
 
   const updateIvan = (type: keyof typeof IVAN_HINTS, key?: string) => {
     if (key && IVAN_HINTS[type] && !Array.isArray(IVAN_HINTS[type]) && (IVAN_HINTS[type] as any)[key]) {
@@ -397,27 +386,12 @@ export default function App() {
                        * Точная цена после осмотра фото или выезда
                     </p>
                   </div>
-
-                  <div className="mt-8 grid grid-cols-2 gap-3 text-left">
-                    <div className="bg-white/60 backdrop-blur-sm p-3 rounded-2xl border border-white">
-                      <div className="text-xs text-green-700 font-bold flex items-center gap-1 uppercase tracking-tighter">
-                        <Users className="w-3 h-3" /> Очередь
-                      </div>
-                      <div className="text-lg font-black text-green-800">2 дня</div>
-                    </div>
-                    <div className="bg-amber-100/40 backdrop-blur-sm p-3 rounded-2xl border border-amber-200/50">
-                      <div className="text-xs text-amber-700 font-bold flex items-center gap-1 uppercase tracking-tighter">
-                        <Clock className="w-3 h-3" /> Бонус
-                      </div>
-                      <div className="text-lg font-black text-amber-800">-5% скидка</div>
-                    </div>
-                  </div>
                 </div>
 
                 <div className="space-y-4">
                   <div className="bg-white border-2 border-gray-100 rounded-3xl p-6 space-y-4 focus-within:border-green-500 transition-colors shadow-sm">
                     <h3 className="font-extrabold text-sm flex items-center gap-2">
-                       📞 <span className="uppercase tracking-widest text-[10px] text-gray-500">Закрепить цену и скидку</span>
+                       📞 <span className="uppercase tracking-widest text-[10px] text-gray-500">Связаться с мастером</span>
                     </h3>
                     <input 
                       type="tel" 
@@ -437,10 +411,6 @@ export default function App() {
                 </div>
 
                 <div className="flex flex-col gap-4 text-center">
-                   <div className="text-xs text-gray-400 flex items-center justify-center gap-2 font-medium">
-                     <Users className="w-4 h-4 text-green-600" />
-                     <span>Сейчас смотрят: <strong className="text-green-700">{liveViewers} чел.</strong></span>
-                   </div>
                    <button 
                     onClick={() => setStep(1)}
                     className="text-gray-400 hover:text-green-600 text-sm font-bold transition-colors underline underline-offset-4 decoration-dotted"
@@ -454,34 +424,9 @@ export default function App() {
           </AnimatePresence>
         </main>
 
-        {/* Footer info blocks for retention */}
-        <div className="bg-gray-50 p-6 flex flex-col sm:flex-row gap-6 border-t border-gray-100 text-xs font-bold text-gray-500 uppercase tracking-widest">
-           <div className="flex items-center gap-3 flex-1">
-             <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-lg shadow-sm border border-gray-100 shrink-0">🛡️</div>
-             <span>Договор и материальная ответственность</span>
-           </div>
-           <div className="flex items-center gap-3 flex-1">
-            <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-lg shadow-sm border border-gray-100 shrink-0">🪓</div>
-            <span>Более 500 спиленных деревьев в СПб</span>
-           </div>
-        </div>
-
       </div>
 
       <IvanAssistant text={ivanText} />
-
-      {/* Floating hints for "A-HA" moment */}
-      <div className="fixed top-8 left-8 hidden lg:block space-y-4">
-        <div className="bg-white/80 backdrop-blur-md p-4 rounded-2xl shadow-xl border border-white max-w-[240px] animate-pulse">
-           <div className="flex items-center gap-2 mb-2">
-              <span className="p-1 bg-green-100 text-green-700 rounded-md"><Info className="w-3 h-3" /></span>
-              <span className="text-[10px] font-black uppercase tracking-wider text-green-800">Совет от эксперта</span>
-           </div>
-           <p className="text-xs text-gray-600 leading-relaxed font-bold">
-             Знали ли вы, что спил дерева частями в 2 раза безопаснее, если рядом есть постройки?
-           </p>
-        </div>
-      </div>
 
     </div>
   );
