@@ -60,8 +60,8 @@ const IVAN_HINTS: Record<string, string[]> = {
 const ProgressBar = ({ step }: { step: number }) => {
   const progress = (step / 4) * 100;
   return (
-    <div className="w-full px-6 pt-6">
-      <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+    <div className="w-full px-6 pt-4">
+      <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
         <motion.div 
           className="h-full bg-green-600"
           initial={{ width: 0 }}
@@ -69,36 +69,21 @@ const ProgressBar = ({ step }: { step: number }) => {
           transition={{ duration: 0.5, ease: "easeInOut" }}
         />
       </div>
-      <div className="mt-2 flex justify-between items-center text-xs text-gray-500 font-medium">
-        <span>Шаг {step} из 4</span>
-        <span>{Math.round(progress)}% завершено</span>
-      </div>
     </div>
   );
 };
 
-const IvanAssistant = ({ text }: { text: string }) => {
-  return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="fixed bottom-4 right-4 left-4 md:left-auto md:right-8 md:w-80 bg-white shadow-2xl rounded-2xl p-4 flex items-start gap-4 border border-green-100 z-50"
-    >
-      <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center shrink-0 text-2xl">
-        🧔
-      </div>
-      <div className="flex-1">
-        <p className="text-sm text-gray-800 leading-snug">{text}</p>
-        <div className="mt-1 flex items-center gap-1 text-[10px] text-green-600 font-bold uppercase tracking-wider">
-          <span className="w-1.5 h-1.5 bg-green-600 rounded-full animate-pulse" />
-          Иван на связи
-        </div>
-      </div>
-    </motion.div>
-  );
-};
-
-// --- Main App Component ---
+const IvanBubble = ({ text, className = "" }: { text: string; className?: string }) => (
+  <motion.div 
+    initial={{ opacity: 0, scale: 0.9, y: 10 }}
+    animate={{ opacity: 1, scale: 1, y: 0 }}
+    key={text}
+    className={`bg-white/95 backdrop-blur-sm p-3 rounded-2xl shadow-sm border border-green-100 flex items-center gap-3 ${className}`}
+  >
+    <div className="text-xl shrink-0">🧔</div>
+    <p className="text-[11px] leading-tight text-gray-700 font-medium">{text}</p>
+  </motion.div>
+);
 
 export default function App() {
   const [step, setStep] = useState(1);
@@ -182,35 +167,44 @@ export default function App() {
                 exit={{ opacity: 0, x: -20 }}
                 className="space-y-6"
               >
-                <div className="space-y-2 text-center">
-                  <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">Какую задачу решим?</h1>
-                  <p className="text-gray-500 text-sm">Выберите основной вид работ на участке</p>
+                <div className="flex justify-center">
+                  <IvanBubble text={ivanText} className="max-w-[280px]" />
+                </div>
+                
+                <div className="space-y-2 text-center pt-2">
+                  <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">Что будем делать?</h1>
+                  <p className="text-gray-500 text-sm">Выберите основной вид работ</p>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {[
                     { id: 'cut', title: 'Спилить дерево', desc: 'Удаление полностью', icon: <TreeDeciduous className="w-6 h-6 text-green-600" /> },
                     { id: 'trim', title: 'Обрезать крону', desc: 'Придать форму', icon: <Scissors className="w-6 h-6 text-blue-600" /> },
                     { id: 'stump', title: 'Удалить пень', desc: 'Фрезеровка в щепу', icon: <Trash2 className="w-6 h-6 text-orange-600" /> },
-                    { id: 'complex', title: 'Все сразу', desc: 'Скидка 15%', icon: <Sparkles className="w-6 h-6 text-purple-600" /> }
+                    { id: 'complex', title: 'Все сразу', desc: 'Скидка 15%', icon: <Sparkles className="w-6 h-6 text-purple-600" />, badge: '-15%' }
                   ].map((s) => (
                     <button 
                       key={s.id}
                       onClick={() => handleServiceSelect(s.id as ServiceType)}
-                      className={`relative flex flex-col items-center p-5 rounded-2xl border-2 transition-all duration-300 text-center group ${
+                      className={`relative flex flex-col items-center p-4 rounded-2xl border-2 transition-all duration-300 text-center group ${
                         data.service === s.id 
                           ? 'border-green-500 bg-green-50 shadow-md' 
                           : 'border-gray-100 hover:border-green-200 hover:bg-gray-50'
                       }`}
                     >
-                      <div className={`mb-3 p-3 rounded-xl transition-colors ${data.service === s.id ? 'bg-white shadow-sm' : 'bg-gray-50'}`}>
+                      {s.badge && (
+                        <div className="absolute -top-2 -right-1 bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-sm animate-bounce">
+                          {s.badge}
+                        </div>
+                      )}
+                      <div className={`mb-2 p-2 rounded-xl transition-colors ${data.service === s.id ? 'bg-white shadow-sm' : 'bg-gray-50'}`}>
                         {s.icon}
                       </div>
-                      <span className="font-bold text-gray-800">{s.title}</span>
-                      <span className="text-xs text-gray-500 mt-1">{s.desc}</span>
+                      <span className="font-bold text-sm text-gray-800">{s.title}</span>
+                      <span className="text-[10px] text-gray-500 mt-0.5">{s.desc}</span>
                       {data.service === s.id && (
-                        <div className="absolute top-3 right-3">
-                          <CheckCircle2 className="w-5 h-5 text-green-500 fill-white" />
+                        <div className="absolute top-2 right-2">
+                          <CheckCircle2 className="w-4 h-4 text-green-500 fill-white" />
                         </div>
                       )}
                     </button>
@@ -240,24 +234,23 @@ export default function App() {
                   <p className="text-gray-500 text-sm">Эти детали влияют на сложность и время работ</p>
                 </div>
 
-                <div className="space-y-8">
-                  {/* Tree Visualization Simulation */}
-                  <div className="bg-gradient-to-b from-sky-50 to-emerald-50 rounded-3xl h-32 flex items-end justify-center p-4 relative overflow-hidden">
-                    <div className="absolute top-4 left-4 bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold border border-white">
-                      {data.service === 'cut' ? 'Визуализация спила' : 'Визуализация пня'}
-                    </div>
+                <div className="space-y-6">
+                  {/* Tree Visualization with integrated Ivan */}
+                  <div className="bg-gradient-to-b from-sky-50 to-emerald-50 rounded-2xl h-24 flex items-end justify-center p-4 relative overflow-hidden border border-sky-100">
+                    <IvanBubble text={ivanText} />
+                    
                     <motion.div 
-                      animate={{ scale: 0.8 + (data.height / 30) }}
-                      className="flex flex-col items-center transition-transform"
+                      animate={{ scale: 0.6 + (data.height / 40) }}
+                      className="flex flex-col items-center transition-transform origin-bottom"
                     >
-                      <div className="w-1 bg-amber-800 h-12" />
-                      <div className="w-16 h-16 bg-green-600 rounded-full -mb-2" />
+                      <div className="w-1.5 bg-amber-800 h-8" />
+                      <div className="w-12 h-10 bg-green-600 rounded-full -mb-1 opacity-90" />
                     </motion.div>
                   </div>
 
-                  {/* Range Sliders */}
-                  <div className="space-y-6">
-                    <div className="space-y-4">
+                  {/* Range Sliders Compact */}
+                  <div className="space-y-4">
+                    <div className="space-y-2">
                       <div className="flex justify-between items-center text-sm font-bold">
                         <label>Высота дерева</label>
                         <span className="text-green-600 bg-green-50 px-3 py-1 rounded-lg border border-green-100">{data.height} м</span>
@@ -370,7 +363,11 @@ export default function App() {
                 animate={{ opacity: 1, y: 0 }}
                 className="space-y-6"
               >
-                <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-[32px] p-8 border border-green-100 text-center relative overflow-hidden shadow-sm">
+                <div className="flex justify-center -mb-2">
+                   <IvanBubble text={ivanText} className="max-w-[300px]" />
+                </div>
+
+                <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-[32px] p-6 border border-green-100 text-center relative overflow-hidden shadow-sm">
                   <div className="absolute -top-10 -right-10 w-40 h-40 bg-green-200/20 rounded-full blur-3xl" />
                   
                   <span className="text-sm font-bold text-green-700 bg-white px-4 py-1.5 rounded-full border border-green-200 mb-6 inline-block">
@@ -425,8 +422,6 @@ export default function App() {
         </main>
 
       </div>
-
-      <IvanAssistant text={ivanText} />
 
     </div>
   );
